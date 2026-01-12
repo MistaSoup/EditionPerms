@@ -6,18 +6,18 @@ A lightweight Minecraft plugin for managing permissions separately for Java Edit
 
 - 🎮 **Separate permissions for Java and Bedrock players**
 - 🔍 **Automatic player detection** via username prefix and UUID checking
-- 👥 **Multiple permission groups** with custom name prefixes
 - 🔄 **Hot reload** - Update permissions without restarting the server
 - ⚡ **Folia compatible** - Works on both Paper and Folia servers
-- 🛠️ **Simple configuration** - Easy YAML setup with clear examples
+- 🛠️ **Simple configuration** - Easy YAML setup
+- 🪶 **Lightweight** - Minimal performance impact
 
 ## Why was this plugin created?
 
-This plugin was originally created to solve a specific problem on crossplay servers: giving Java Edition players anticheat bypass permissions while keeping Bedrock Edition players under normal anticheat protection. It has since evolved into a flexible permission management system for any crossplay server running Geyser/Floodgate.
+This plugin was originally created to solve a specific problem on crossplay servers: giving Java Edition players anticheat bypass permissions while keeping Bedrock Edition players under normal anticheat protection. It has since evolved into a simple permission management system for any crossplay server running Geyser/Floodgate.
 
 ## Requirements
 
-- Minecraft 1.21+
+- Minecraft 1.21.x
 - Paper or Folia server
 - Java 21+
 
@@ -33,57 +33,91 @@ This plugin was originally created to solve a specific problem on crossplay serv
 
 The plugin creates a `config.yml` file in `plugins/EditionPerms/`:
 ```yaml
-# Bedrock player detection settings
+# ==================================================================================
+# BEDROCK PLAYER DETECTION
+# ==================================================================================
+# These settings determine HOW the plugin identifies Bedrock players
 detection:
-  bedrock-prefix: "."  # Bedrock players have "." prefix in their username
-  bedrock-uuid-check: true  # Also check UUID format
+  # Bedrock players have this prefix in their username (default: ".")
+  # Example: ".PlayerName" is a Bedrock player, "PlayerName" is Java
+  bedrock-prefix: "."
+  
+  # Also check UUID format to detect Bedrock players (recommended: true)
+  # Bedrock UUIDs start with "00000000-0000-0000"
+  bedrock-uuid-check: true
 
-# Permission groups
+# ==================================================================================
+# PERMISSION GROUPS
+# ==================================================================================
+# After a player is identified as Java or Bedrock, these groups assign permissions
+
 groups:
-  # All Java players get these permissions
+  # Give permissions to ALL Java players
   default-java:
     type: java
-    prefix: ""  # Empty = all Java players
+    prefix: ""  # LEAVE EMPTY to apply to ALL Java players
     permissions:
       - minecraft.command.me
-      - some.other.permission
+      - minecraft.command.trigger
   
-  # All Bedrock players get these permissions
+  # Give permissions to ALL Bedrock players
   default-bedrock:
     type: bedrock
-    prefix: ""  # Empty = all Bedrock players
+    prefix: ""  # LEAVE EMPTY to apply to ALL Bedrock players
     permissions:
       - minecraft.command.me
-      - different.permission
+      - minecraft.command.trigger
 ```
 
-### Advanced Usage
+### Example Configurations
 
-You can create groups for specific players using name prefixes:
+**Give Java players anticheat bypass:**
 ```yaml
 groups:
-  # VIP players (both Java and Bedrock with "VIP_" prefix)
-  vip-players:
-    type: all
-    prefix: "VIP_"
-    permissions:
-      - essentials.fly
-      - essentials.speed
-  
-  # Moderators (Java players with "Mod_" prefix)
-  moderators:
+  default-java:
     type: java
-    prefix: "Mod_"
+    prefix: ""
     permissions:
-      - essentials.kick
-      - essentials.ban
+      - nocheatplus.shortcut.bypass
+      - spartan.bypass
+      - essentials.spawn
+  
+  default-bedrock:
+    type: bedrock
+    prefix: ""
+    permissions:
+      - essentials.spawn
 ```
 
-### Group Options
+**Give Java players creative permissions:**
+```yaml
+groups:
+  default-java:
+    type: java
+    prefix: ""
+    permissions:
+      - worldedit.selection
+      - essentials.fly
+      - essentials.gamemode
+  
+  default-bedrock:
+    type: bedrock
+    prefix: ""
+    permissions:
+      - essentials.spawn
+```
 
-- **type**: `java`, `bedrock`, or `all`
-- **prefix**: Username prefix to match (leave empty for all players of that type)
-- **permissions**: List of permissions to grant
+**Give everyone the same permissions:**
+```yaml
+groups:
+  all-players:
+    type: all  # Both Java and Bedrock
+    prefix: ""
+    permissions:
+      - essentials.spawn
+      - essentials.tpa
+      - essentials.sethome
+```
 
 ## Commands
 
@@ -101,59 +135,9 @@ groups:
    - Checks username prefix (default: `.` for Bedrock)
    - Checks UUID format (`00000000-0000-0000-xxxx` for Bedrock)
 
-2. **Groups are checked** → Plugin finds matching groups based on:
-   - Player type (Java/Bedrock)
-   - Username prefix (if specified)
+2. **Groups are checked** → Plugin finds matching groups based on player type
 
 3. **Permissions applied** → All matching groups' permissions are granted instantly
-
-## Examples
-
-### Basic Crossplay Setup
-```yaml
-groups:
-  default-java:
-    type: java
-    prefix: ""
-    permissions:
-      - nocheatplus.bypass  # Java players bypass anticheat
-      - essentials.spawn
-  
-  default-bedrock:
-    type: bedrock
-    prefix: ""
-    permissions:
-      - essentials.spawn  # Bedrock players don't get bypass
-```
-
-### VIP Ranks
-```yaml
-groups:
-  vip-java:
-    type: java
-    prefix: "VIP_"
-    permissions:
-      - essentials.fly
-      - worldedit.selection
-  
-  vip-bedrock:
-    type: bedrock
-    prefix: ".VIP_"  # Note: Bedrock prefix includes the "."
-    permissions:
-      - essentials.fly
-```
-
-### Staff Permissions
-```yaml
-groups:
-  staff:
-    type: all  # Both Java and Bedrock
-    prefix: "Staff_"
-    permissions:
-      - essentials.kick
-      - essentials.mute
-      - essentials.teleport
-```
 
 ## Building from Source
 
@@ -168,7 +152,15 @@ cd EditionPerms
 mvn clean package
 ```
 
-3. Find the compiled JAR in `target/EditionPerms-x.x.x.jar`
+3. Find the compiled JAR in `target/EditionPerms-2.0.0.jar`
+
+**Note:** Make sure to change `<n>` to `<name>` in the `pom.xml` before building!
+
+## Support
+
+- 🐛 **Bug Reports**: [Open an issue](https://github.com/yourusername/EditionPerms/issues)
+- 💡 **Feature Requests**: [Open an issue](https://github.com/yourusername/EditionPerms/issues)
+- 📚 **Modrinth**: [Download here](https://modrinth.com/plugin/editionperms)
 
 ## License
 
