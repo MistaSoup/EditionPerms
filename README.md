@@ -11,9 +11,9 @@ A lightweight Minecraft plugin for managing permissions separately for Java Edit
 - ⚡ **Folia compatible** - Works on both Paper and Folia servers
 - 🛠️ **Simple configuration** - Easy YAML setup with clear examples
 
-## Why EditionPerms?
+## Why was this plugin created?
 
-Crossplay servers using Geyser often need different permissions for Java and Bedrock players due to gameplay differences. EditionPerms makes this simple by automatically detecting player types and assigning appropriate permissions.
+This plugin was originally created to solve a specific problem on crossplay servers: giving Java Edition players anticheat bypass permissions while keeping Bedrock Edition players under normal anticheat protection. It has since evolved into a flexible permission management system for any crossplay server running Geyser/Floodgate.
 
 ## Requirements
 
