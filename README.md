@@ -107,18 +107,6 @@ groups:
       - essentials.spawn
 ```
 
-**Give everyone the same permissions:**
-```yaml
-groups:
-  all-players:
-    type: all  # Both Java and Bedrock
-    prefix: ""
-    permissions:
-      - essentials.spawn
-      - essentials.tpa
-      - essentials.sethome
-```
-
 ## Commands
 
 | Command | Aliases | Permission | Description |
@@ -152,15 +140,7 @@ cd EditionPerms
 mvn clean package
 ```
 
-3. Find the compiled JAR in `target/EditionPerms-2.0.0.jar`
-
-**Note:** Make sure to change `<n>` to `<name>` in the `pom.xml` before building!
-
-## Support
-
-- 🐛 **Bug Reports**: [Open an issue](https://github.com/yourusername/EditionPerms/issues)
-- 💡 **Feature Requests**: [Open an issue](https://github.com/yourusername/EditionPerms/issues)
-- 📚 **Modrinth**: [Download here](https://modrinth.com/plugin/editionperms)
+3. Find the compiled JAR in `target/EditionPerms-1.0.0.jar`
 
 ## License
 
