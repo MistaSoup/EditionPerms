@@ -23,7 +23,7 @@ This plugin was originally created to solve a specific problem on crossplay serv
 
 ## Installation
 
-1. Download the latest `EditionPerms-x.x.x.jar` from [Releases](https://github.com/yourusername/EditionPerms/releases)
+1. Download the latest `EditionPerms-x.x.x.jar` from [Releases](https://github.com/MistaSoup/EditionPerms/releases)
 2. Place the JAR file in your `plugins/` folder
 3. Restart your server
 4. Edit `plugins/EditionPerms/config.yml` to configure permissions
