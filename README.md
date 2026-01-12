@@ -6,7 +6,7 @@ A lightweight Minecraft plugin for managing permissions separately for Java Edit
 
 - 🎮 **Separate permissions for Java and Bedrock players**
 - 🔍 **Automatic player detection** via username prefix and UUID checking
-- 🔄 **Hot reload** - Update permissions without restarting the server
+- 🔄 **Fast reload** - Update permissions without restarting the server
 - ⚡ **Folia compatible** - Works on both Paper and Folia servers
 - 🛠️ **Simple configuration** - Easy YAML setup
 - 🪶 **Lightweight** - Minimal performance impact
