@@ -1,0 +1,38 @@
+# EditionPerms Configuration
+# Define permission groups with custom prefixes and detection methods
+
+# ==================================================================================
+# BEDROCK PLAYER DETECTION
+# ==================================================================================
+# These settings determine HOW the plugin identifies Bedrock players
+detection:
+  # Bedrock players have this prefix in their username (default: ".")
+  # Example: ".PlayerName" is a Bedrock player, "PlayerName" is Java
+  bedrock-prefix: "."
+  
+  # Also check UUID format to detect Bedrock players (recommended: true)
+  # Bedrock UUIDs start with "00000000-0000-0000"
+  bedrock-uuid-check: true
+
+# ==================================================================================
+# PERMISSION GROUPS
+# ==================================================================================
+# After a player is identified as Java or Bedrock, these groups assign permissions
+# Groups are applied in order - players can match multiple groups
+
+groups:
+  # Give permissions to ALL Java players
+  default-java:
+    type: java
+    prefix: ""  # LEAVE EMPTY to apply to ALL Java players
+    permissions:
+      - minecraft.command.me
+      - minecraft.command.trigger
+  
+  # Give permissions to ALL Bedrock players
+  default-bedrock:
+    type: bedrock
+    prefix: ""  # LEAVE EMPTY to apply to ALL Bedrock players
+    permissions:
+      - minecraft.command.me
+      - minecraft.command.trigger
