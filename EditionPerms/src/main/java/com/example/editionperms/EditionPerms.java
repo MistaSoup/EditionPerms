@@ -1,3 +1,12 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2026 Mason Soup
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction...
+ */
 package com.example.editionperms;
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
@@ -29,19 +38,27 @@ public class EditionPerms extends JavaPlugin implements Listener {
         loadConfigValues();
         
         getServer().getPluginManager().registerEvents(this, this);
-        getLogger().info("EditionPerms has been enabled! Folia-compatible mode active.");
+        getLogger().info("EditionPerms v2.1.0 enabled! Compatible with all 1.21.x versions (Folia-ready)");
         
         // Apply permissions to already online players (in case of reload)
-        for (Player player : getServer().getOnlinePlayers()) {
-            applyPermissions(player);
-        }
+        // Use global scheduler for server-wide operation
+        getServer().getGlobalRegionScheduler().runDelayed(this, (task) -> {
+            for (Player player : getServer().getOnlinePlayers()) {
+                // Schedule on player's entity scheduler
+                player.getScheduler().run(this, (t) -> applyPermissions(player), null);
+            }
+        }, 1L);
     }
     
     @Override
     public void onDisable() {
         // Remove all permission attachments
         for (PermissionAttachment attachment : attachments.values()) {
-            attachment.remove();
+            try {
+                attachment.remove();
+            } catch (Exception e) {
+                // Ignore errors during shutdown
+            }
         }
         attachments.clear();
         getLogger().info("EditionPerms has been disabled!");
@@ -86,7 +103,11 @@ public class EditionPerms extends JavaPlugin implements Listener {
             
             // Remove all current attachments
             for (PermissionAttachment attachment : attachments.values()) {
-                attachment.remove();
+                try {
+                    attachment.remove();
+                } catch (Exception e) {
+                    // Continue even if some attachments fail to remove
+                }
             }
             attachments.clear();
             
@@ -96,7 +117,7 @@ public class EditionPerms extends JavaPlugin implements Listener {
             
             // Reapply permissions to all online players
             for (Player player : getServer().getOnlinePlayers()) {
-                applyPermissions(player);
+                player.getScheduler().run(this, (task) -> applyPermissions(player), null);
             }
             
             sender.sendMessage("§aEditionPerms config reloaded and permissions reapplied!");
@@ -110,10 +131,10 @@ public class EditionPerms extends JavaPlugin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         
-        // Use Folia's entity scheduler to ensure thread-safety
-        player.getScheduler().run(this, (ScheduledTask task) -> {
+        // Use Folia's entity scheduler with a small delay to ensure player is fully loaded
+        player.getScheduler().runDelayed(this, (ScheduledTask task) -> {
             applyPermissions(player);
-        }, null);
+        }, null, 1L);
     }
     
     @EventHandler
@@ -123,7 +144,11 @@ public class EditionPerms extends JavaPlugin implements Listener {
         
         // Clean up attachment when player leaves
         if (attachments.containsKey(playerId)) {
-            attachments.get(playerId).remove();
+            try {
+                attachments.get(playerId).remove();
+            } catch (Exception e) {
+                // Ignore errors during cleanup
+            }
             attachments.remove(playerId);
         }
     }
@@ -134,7 +159,11 @@ public class EditionPerms extends JavaPlugin implements Listener {
         
         // Remove old attachment if exists
         if (attachments.containsKey(playerId)) {
-            attachments.get(playerId).remove();
+            try {
+                attachments.get(playerId).remove();
+            } catch (Exception e) {
+                getLogger().warning("Failed to remove old attachment for " + playerName);
+            }
         }
         
         // Create new permission attachment
@@ -151,8 +180,12 @@ public class EditionPerms extends JavaPlugin implements Listener {
         for (PermissionGroup group : groups.values()) {
             if (shouldApplyGroup(player, group, playerType)) {
                 for (String permission : group.permissions) {
-                    attachment.setPermission(permission, true);
-                    totalPermissions++;
+                    try {
+                        attachment.setPermission(permission, true);
+                        totalPermissions++;
+                    } catch (Exception e) {
+                        getLogger().warning("Failed to set permission '" + permission + "' for " + playerName);
+                    }
                 }
                 appliedGroups.add(group.name);
             }
@@ -160,18 +193,27 @@ public class EditionPerms extends JavaPlugin implements Listener {
         
         attachments.put(playerId, attachment);
         
+        // CRITICAL FIX: Force the server to resend commands to the player
+        // This updates tab completion and removes the red text from commands
+        player.getScheduler().runDelayed(this, (ScheduledTask task) -> {
+            player.updateCommands();
+        }, null, 2L); // 2 tick delay to ensure permissions are fully applied
+        
         if (totalPermissions > 0) {
             getLogger().info(playerType.toUpperCase() + " player " + playerName + 
                 " granted " + totalPermissions + " permissions from groups: " + 
                 String.join(", ", appliedGroups));
+        } else {
+            getLogger().fine(playerType.toUpperCase() + " player " + playerName + 
+                " joined but no permissions were applied.");
         }
     }
     
     private boolean isBedrockPlayer(Player player) {
         String playerName = player.getName();
         
-        // Check prefix
-        if (playerName.startsWith(bedrockPrefix)) {
+        // Check prefix first (most reliable for Geyser)
+        if (!bedrockPrefix.isEmpty() && playerName.startsWith(bedrockPrefix)) {
             return true;
         }
         
